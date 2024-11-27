@@ -1,6 +1,6 @@
 {
   "name": "@sourcebug/image-wasm",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "",
   "main": "dist/index.umd.js",
   "module": "dist/index.mjs",
@@ -10,7 +10,8 @@
     "private:install": "tsx ./scripts/install.js",
     "dev": "vite --port 1796",
     "build": "vite build --mode production",
-    "tslint": "tsc --noEmit"
+    "tslint": "tsc --noEmit",
+    "prepublishOnly": "pnpm run build"
   },
   "files": [
     "dist/src",

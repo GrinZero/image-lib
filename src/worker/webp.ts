@@ -1,5 +1,5 @@
 import initWebpEncoder from "../wasm/webp_enc";
-import type { WebPModule } from "../wasm/webp_enc";
+import type { EncodeOptions, WebPModule } from "../wasm/webp_enc";
 
 const webpEncoder = initWebpEncoder();
 
@@ -51,7 +51,7 @@ export interface ToWebpData {
     buffer: ArrayBuffer;
     width: number;
     height: number;
-    quality: number;
+    options?: EncodeOptions;
   };
 }
 
@@ -83,7 +83,7 @@ self.addEventListener("message", async (e) => {
         message.data.height,
         {
           ...DEFAULT_ENCODE_OPTS,
-          quality: message.data.quality,
+          ...(message.data.options || {}),
         }
       );
       const arrayBuffer = encodedData ? encodedData.buffer : null;

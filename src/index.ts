@@ -1,4 +1,5 @@
 import { postMessage } from "./utils/worker";
+import { EncodeOptions } from "./wasm/webp_enc";
 
 async function loadImage(src: string) {
   const img = document.createElement("img");
@@ -14,10 +15,10 @@ async function loadImage(src: string) {
 /**
  * Compress image to webp
  * @param file - The image file to compress
- * @param quality - The quality of the compressed image, from 0 to 100
+ * @param options - The options of the compressed image
  * @returns The compressed image file
  */
-export const toWebp = async (file: File, quality = 100) => {
+export const toWebp = async (file: File, options?: EncodeOptions) => {
   const url = URL.createObjectURL(file);
   const imageData = await loadImage(url);
   URL.revokeObjectURL(url);
@@ -30,7 +31,7 @@ export const toWebp = async (file: File, quality = 100) => {
       buffer,
       width: imageData.width,
       height: imageData.height,
-      quality,
+      options,
     },
     { postMessageOptions: { transfer: [buffer] } }
   );
@@ -49,3 +50,5 @@ export const toWebp = async (file: File, quality = 100) => {
 
   return newFile;
 };
+
+export type { EncodeOptions };

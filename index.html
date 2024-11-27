@@ -48,7 +48,9 @@
             const buffer = e.target.result;
             const uint8Array = new Uint8Array(buffer);
             const quality = parseInt(qualityInput.value, 10) || 80;
-            const compressedFile = await toWebp(originalBlob);
+            const compressedFile = await toWebp(originalBlob, {
+              quality,
+            });
 
             const compressedBlob = new Blob([compressedFile], {
               type: "image/webp",

@@ -2,8 +2,7 @@ import WebpWorker from "../worker/webp?worker&inline";
 
 const worker = new WebpWorker();
 
-// 30s
-const DEFAULT_TIMEOUT = 1000 * 30;
+const DEFAULT_TIMEOUT = 1000 * 60;
 
 export interface Options {
   /**
@@ -14,7 +13,7 @@ export interface Options {
 
   /**
    * 超时时间
-   * @default 30s
+   * @default 60s
    */
   timeout?: number;
 

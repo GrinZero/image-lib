@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WASM Image Compressor</title>
+    <script type="module" defer>
+      import { toWebp } from "./src/index.ts";
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const originalImageInput = document.getElementById("original-image");
+        const compressButton = document.getElementById("compress-btn");
+        const resetButton = document.getElementById("reset-btn");
+        const qualityInput = document.getElementById("quality");
+
+        const originalPreview = document.getElementById("original-preview");
+        const compressedPreview = document.getElementById("compressed-preview");
+        const originalInfo = document.getElementById("original-info");
+        const compressedInfo = document.getElementById("compressed-info");
+        const compressionRatio = document.getElementById("compression-ratio");
+
+        let originalBlob = null;
+        let compressedBlob = null;
+
+        originalImageInput.addEventListener("change", (event) => {
+          const file = event.target.files[0];
+          if (file) {
+            originalBlob = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              originalPreview.src = e.target.result;
+              originalInfo.textContent = `Original: ${file.name} (${(
+                file.size / 1024
+              ).toFixed(2)} KB)`;
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+
+        compressButton.addEventListener("click", async () => {
+          if (!originalBlob) {
+            alert("Please upload an image first!");
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.onload = async (e) => {
+            const buffer = e.target.result;
+            const uint8Array = new Uint8Array(buffer);
+            const quality = parseInt(qualityInput.value, 10) || 80;
+            const compressedFile = await toWebp(originalBlob);
+
+            const compressedBlob = new Blob([compressedFile], {
+              type: "image/webp",
+            });
+
+            compressedPreview.src = URL.createObjectURL(compressedBlob);
+            compressedInfo.textContent = `Compressed: ${(
+              compressedBlob.size / 1024
+            ).toFixed(2)} KB`;
+            compressionRatio.textContent = `Compression Ratio: ${(
+              (compressedBlob.size / originalBlob.size) *
+              100
+            ).toFixed(2)}%`;
+          };
+          reader.readAsArrayBuffer(originalBlob);
+        });
+
+        resetButton.addEventListener("click", () => {
+          originalImageInput.value = "";
+          originalPreview.src = "";
+          compressedPreview.src = "";
+          originalInfo.textContent = "";
+          compressedInfo.textContent = "";
+          compressionRatio.textContent = "";
+          originalBlob = null;
+          compressedBlob = null;
+        });
+      });
+    </script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f5f7fa;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 2rem;
+      }
+
+      h1 {
+        color: #333;
+      }
+
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        justify-content: center;
+        width: 100%;
+        max-width: 1200px;
+      }
+
+      .box {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 1rem;
+        flex: 1;
+        min-width: 300px;
+        max-width: 400px;
+        text-align: center;
+      }
+
+      img {
+        max-width: 100%;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+      }
+
+      .actions {
+        margin-top: 1rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+      }
+
+      input[type="file"] {
+        margin: 1rem 0;
+      }
+
+      button {
+        background: #007bff;
+        color: #fff;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      button:hover {
+        background: #0056b3;
+      }
+
+      button:disabled {
+        background: #ddd;
+        cursor: not-allowed;
+      }
+
+      .info {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>WASM Image Compressor</h1>
+    <div class="container">
+      <div class="box">
+        <h2>Original Image</h2>
+        <img id="original-preview" alt="Original Preview" />
+        <p id="original-info" class="info"></p>
+        <input type="file" id="original-image" accept="image/*" />
+      </div>
+      <div class="box">
+        <h2>Compressed Image</h2>
+        <img id="compressed-preview" alt="Compressed Preview" />
+        <p id="compressed-info" class="info"></p>
+        <p id="compression-ratio" class="info"></p>
+      </div>
+    </div>
+    <div class="actions">
+      <label for="quality">Quality (1-100): </label>
+      <input type="number" id="quality" min="1" max="100" value="80" />
+      <button id="compress-btn">Compress</button>
+      <button id="reset-btn">Reset</button>
+    </div>
+  </body>
+</html>

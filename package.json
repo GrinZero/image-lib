@@ -1,0 +1,26 @@
+{
+  "name": "image-wasm",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/index.umd.js",
+  "module": "dist/index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "tsx ./scripts/install.js",
+    "dev": "vite --port 1796",
+    "build": "vite build --mode production"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-wasm": "^6.2.2",
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "vite": "^5.4.11",
+    "vite-plugin-dts": "^4.3.0",
+    "vite-plugin-top-level-await": "^1.4.4",
+    "vite-plugin-wasm": "^3.3.0",
+    "vitest": "^2.1.5"
+  }
+}

@@ -40,8 +40,10 @@ export const toWebp = async (file: File, options?: EncodeOptions) => {
     throw new Error("Failed to compress image");
   }
 
-  const newFile = new File([result.encodedData], file.name, {
+  // change name and type to webp
+  const newFile = new File([result.encodedData], `${file.name}.webp`, {
     ...file,
+    type: "image/webp",
   });
 
   if (newFile.size > file.size) {

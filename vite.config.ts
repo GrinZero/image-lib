@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
 import { resolve } from "path";
 import { defineConfig } from "vite";
-import { wasm } from "@rollup/plugin-wasm";
+// import { wasm } from "@rollup/plugin-wasm";
 import dts from "vite-plugin-dts";
 
 export default defineConfig(({ mode }) => {
@@ -9,14 +9,6 @@ export default defineConfig(({ mode }) => {
     return {
       build: {
         outDir: "build",
-      },
-      plugins: [dts()],
-      worker: {
-        plugins: () => [
-          wasm({
-            targetEnv: "auto-inline",
-          }),
-        ],
       },
     };
   }
@@ -34,12 +26,6 @@ export default defineConfig(({ mode }) => {
         external: [],
       },
     },
-    worker: {
-      plugins: () => [
-        wasm({
-          targetEnv: "auto-inline",
-        }),
-      ],
-    },
-  };;
+    plugins: [dts()],
+  };
 });

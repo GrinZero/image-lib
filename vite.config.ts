@@ -1,7 +1,6 @@
 /// <reference types="vitest" />
 import { resolve } from "path";
 import { defineConfig } from "vite";
-// import { wasm } from "@rollup/plugin-wasm";
 import dts from "vite-plugin-dts";
 
 export default defineConfig(({ mode }) => {

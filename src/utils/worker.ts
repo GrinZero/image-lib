@@ -2,6 +2,9 @@ import WebpWorker from "../worker/webp?worker&inline";
 
 const worker = new WebpWorker();
 
+// 30s
+const DEFAULT_TIMEOUT = 1000 * 30;
+
 export interface Options {
   /**
    * 是否需要回复
@@ -11,7 +14,7 @@ export interface Options {
 
   /**
    * 超时时间
-   * @default 10000
+   * @default 30s
    */
   timeout?: number;
 
@@ -25,7 +28,7 @@ export const postMessage = <T = unknown>(
   const id = Math.random().toString(36).substring(2, 15);
   const opts = {
     hasCallback: true,
-    timeout: 10000,
+    timeout: DEFAULT_TIMEOUT,
     ...(options || {}),
   };
 

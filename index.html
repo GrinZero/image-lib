@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WASM Image Compressor</title>
     <script type="module" defer>
-      import { toWebp } from "./src/index.ts";
+      import { toWebp, toWebpJs } from "./src/index.ts";
 
       document.addEventListener("DOMContentLoaded", () => {
         const originalImageInput = document.getElementById("original-image");
@@ -18,6 +18,7 @@
         const originalInfo = document.getElementById("original-info");
         const compressedInfo = document.getElementById("compressed-info");
         const compressionRatio = document.getElementById("compression-ratio");
+        const timeTakenDisplay = document.getElementById("time-taken");
 
         let originalBlob = null;
         let compressedBlob = null;
@@ -48,13 +49,17 @@
             const buffer = e.target.result;
             const uint8Array = new Uint8Array(buffer);
             const quality = parseInt(qualityInput.value, 10) || 80;
-            const compressedFile = await toWebp(originalBlob, {
-              quality,
-            });
 
-            const compressedBlob = new Blob([compressedFile], {
-              type: "image/webp",
-            });
+            const startTime = performance.now();
+
+            const compressedBlob = await toWebp(originalBlob, { quality });
+
+            const endTime = performance.now();
+            const timeTaken = endTime - startTime;
+
+            timeTakenDisplay.textContent = `Compression Time: ${timeTaken.toFixed(
+              2
+            )} ms`;
 
             compressedPreview.src = URL.createObjectURL(compressedBlob);
             compressedInfo.textContent = `Compressed: ${(
@@ -75,6 +80,7 @@
           originalInfo.textContent = "";
           compressedInfo.textContent = "";
           compressionRatio.textContent = "";
+          timeTakenDisplay.textContent = "";
           originalBlob = null;
           compressedBlob = null;
         });
@@ -183,5 +189,6 @@
       <button id="compress-btn">Compress</button>
       <button id="reset-btn">Reset</button>
     </div>
+    <p id="time-taken" class="info"></p>
   </body>
 </html>

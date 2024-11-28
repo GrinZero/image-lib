@@ -1,5 +1,6 @@
-import initWebpEncoder from "../wasm/webp_enc";
-import type { EncodeOptions, WebPModule } from "../wasm/webp_enc";
+import initWebpEncoder from "../../wasm/webp_enc";
+import type { EncodeOptions, WebPModule } from "../../wasm/webp_enc";
+import { toWebpJsInWorker } from "./toWebpJs";
 
 const webpEncoder = initWebpEncoder();
 
@@ -48,14 +49,20 @@ export interface ToWebpData {
   id: string;
   type: "toWebp";
   data: {
-    buffer: ArrayBuffer;
-    width: number;
-    height: number;
+    url: string;
     options?: EncodeOptions;
   };
 }
 
-export type MessageData = ToWebpData;
+export interface ToWebpJsData {
+  id: string;
+  type: "toWebpJs";
+  data: {
+    url: string;
+    quality: number;
+  };
+}
+export type MessageData = ToWebpData | ToWebpJsData;
 
 const postMessage = (
   id: string,
@@ -77,10 +84,13 @@ self.addEventListener("message", async (e) => {
 
   switch (message.type) {
     case "toWebp": {
+      const blob = await fetch(message.data.url).then((res) => res.blob());
+      const img = await createImageBitmap(blob);
+      const buffer = await blob.arrayBuffer();
       const encodedData = encoder.encode(
-        new Uint8Array(message.data.buffer),
-        message.data.width,
-        message.data.height,
+        new Uint8Array(buffer),
+        img.width,
+        img.height,
         {
           ...DEFAULT_ENCODE_OPTS,
           ...(message.data.options || {}),
@@ -98,6 +108,13 @@ self.addEventListener("message", async (e) => {
             }
           : void 0
       );
+      break;
+    }
+    case "toWebpJs": {
+      const blob = await fetch(message.data.url).then((res) => res.blob());
+      const webpBlob = await toWebpJsInWorker(blob, message.data.quality);
+      const buf = await webpBlob.arrayBuffer();
+      postMessage(message.id, { buf }, { transfer: [buf] });
     }
   }
 });

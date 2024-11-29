@@ -10,6 +10,7 @@
       document.addEventListener("DOMContentLoaded", () => {
         const originalImageInput = document.getElementById("original-image");
         const compressButton = document.getElementById("compress-btn");
+        const compressJsButton = document.getElementById("compress-js-btn");
         const resetButton = document.getElementById("reset-btn");
         const qualityInput = document.getElementById("quality");
 
@@ -38,41 +39,45 @@
           }
         });
 
-        compressButton.addEventListener("click", async () => {
-          if (!originalBlob) {
-            alert("Please upload an image first!");
-            return;
-          }
+        const createCompressHandler = (compressFn) => {
+          return async () => {
+            if (!originalBlob) {
+              alert("Please upload an image first!");
+              return;
+            }
 
-          const reader = new FileReader();
-          reader.onload = async (e) => {
-            const buffer = e.target.result;
-            const uint8Array = new Uint8Array(buffer);
-            const quality = parseInt(qualityInput.value, 10) || 80;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+              const buffer = e.target.result;
+              const uint8Array = new Uint8Array(buffer);
+              const quality = parseInt(qualityInput.value, 10) || 80;
 
-            const startTime = performance.now();
+              const startTime = performance.now();
 
-            const compressedBlob = await toWebp(originalBlob, { quality });
+              const compressedBlob = await compressFn(originalBlob, { quality });
 
-            const endTime = performance.now();
-            const timeTaken = endTime - startTime;
+              const endTime = performance.now();
+              const timeTaken = endTime - startTime;
 
-            timeTakenDisplay.textContent = `Compression Time: ${timeTaken.toFixed(
-              2
-            )} ms`;
+              timeTakenDisplay.textContent = `Compression Time: ${timeTaken.toFixed(
+                2
+              )} ms`;
 
-            compressedPreview.src = URL.createObjectURL(compressedBlob);
-            compressedInfo.textContent = `Compressed: ${(
-              compressedBlob.size / 1024
-            ).toFixed(2)} KB`;
-            compressionRatio.textContent = `Compression Ratio: ${(
-              (compressedBlob.size / originalBlob.size) *
-              100
-            ).toFixed(2)}%`;
+              compressedPreview.src = URL.createObjectURL(compressedBlob);
+              compressedInfo.textContent = `Compressed: ${(
+                compressedBlob.size / 1024
+              ).toFixed(2)} KB`;
+              compressionRatio.textContent = `Compression Ratio: ${(
+                (compressedBlob.size / originalBlob.size) *
+                100
+              ).toFixed(2)}%`;
+            };
+            reader.readAsArrayBuffer(originalBlob);
           };
-          reader.readAsArrayBuffer(originalBlob);
-        });
+        };
 
+        compressButton.addEventListener("click", createCompressHandler(toWebp));
+        compressJsButton.addEventListener("click", createCompressHandler(toWebpJs));
         resetButton.addEventListener("click", () => {
           originalImageInput.value = "";
           originalPreview.src = "";
@@ -187,6 +192,7 @@
       <label for="quality">Quality (1-100): </label>
       <input type="number" id="quality" min="1" max="100" value="80" />
       <button id="compress-btn">Compress</button>
+      <button id="compress-js-btn">Compress (JS)</button>
       <button id="reset-btn">Reset</button>
     </div>
     <p id="time-taken" class="info"></p>

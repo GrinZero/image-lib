@@ -49,7 +49,9 @@ export interface ToWebpData {
   id: string;
   type: "toWebp";
   data: {
-    url: string;
+    buffer: ArrayBuffer;
+    width: number;
+    height: number;
     options?: EncodeOptions;
   };
 }
@@ -84,13 +86,10 @@ self.addEventListener("message", async (e) => {
 
   switch (message.type) {
     case "toWebp": {
-      const blob = await fetch(message.data.url).then((res) => res.blob());
-      const img = await createImageBitmap(blob);
-      const buffer = await blob.arrayBuffer();
       const encodedData = encoder.encode(
-        new Uint8Array(buffer),
-        img.width,
-        img.height,
+        message.data.buffer,
+        message.data.width,
+        message.data.height,
         {
           ...DEFAULT_ENCODE_OPTS,
           ...(message.data.options || {}),

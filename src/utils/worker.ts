@@ -51,7 +51,11 @@ export const postMessage = <T = unknown>(
         if (e.data.id === id) {
           clearTimeout(timeId);
           worker.removeEventListener("message", listener);
-          resolve(e.data.data);
+          if (e.data.data.type === "error") {
+            reject(e);
+          } else {
+            resolve(e.data.data);
+          }
         }
       };
       worker.addEventListener("message", listener);

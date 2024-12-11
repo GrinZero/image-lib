@@ -71,49 +71,63 @@ const postMessage = (
   data?: unknown,
   options?: WindowPostMessageOptions
 ) => {
-  self.postMessage(
-    {
-      id,
-      data,
-    },
-    options
-  );
+  try {
+    self.postMessage(
+      {
+        id,
+        data,
+      },
+      options
+    );
+  } catch (error) {
+    self.postMessage(
+      {
+        id,
+        data: { error, type: "error" },
+      },
+      options
+    );
+  }
 };
 
 self.addEventListener("message", async (e) => {
   const message = e.data as MessageData;
-  const encoder = await encoderInstance;
+  try {
+    const encoder = await encoderInstance;
 
-  switch (message.type) {
-    case "toWebp": {
-      const encodedData = encoder.encode(
-        message.data.buffer,
-        message.data.width,
-        message.data.height,
-        {
-          ...DEFAULT_ENCODE_OPTS,
-          ...(message.data.options || {}),
-        }
-      );
-      const arrayBuffer = encodedData ? encodedData.buffer : null;
-      postMessage(
-        message.id,
-        {
-          encodedData: arrayBuffer,
-        },
-        arrayBuffer
-          ? {
-              transfer: [arrayBuffer],
-            }
-          : void 0
-      );
-      break;
+    switch (message.type) {
+      case "toWebp": {
+        const encodedData = encoder.encode(
+          message.data.buffer,
+          message.data.width,
+          message.data.height,
+          {
+            ...DEFAULT_ENCODE_OPTS,
+            ...(message.data.options || {}),
+          }
+        );
+        const arrayBuffer = encodedData ? encodedData.buffer : null;
+        postMessage(
+          message.id,
+          {
+            encodedData: arrayBuffer,
+          },
+          arrayBuffer
+            ? {
+                transfer: [arrayBuffer],
+              }
+            : void 0
+        );
+        break;
+      }
+      case "toWebpJs": {
+        const blob = await fetch(message.data.url).then((res) => res.blob());
+        const webpBlob = await toWebpJsInWorker(blob, message.data.quality);
+        const buf = await webpBlob.arrayBuffer();
+        postMessage(message.id, { buf }, { transfer: [buf] });
+      }
     }
-    case "toWebpJs": {
-      const blob = await fetch(message.data.url).then((res) => res.blob());
-      const webpBlob = await toWebpJsInWorker(blob, message.data.quality);
-      const buf = await webpBlob.arrayBuffer();
-      postMessage(message.id, { buf }, { transfer: [buf] });
-    }
+  } catch (error) {
+    postMessage(message.id, { error, type: "error" });
   }
 });

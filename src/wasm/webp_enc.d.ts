@@ -1,3 +1,4 @@
+/// <reference types="./emscripten-types.d.ts" />
 export interface EncodeOptions {
   quality: number;
   target_size: number;

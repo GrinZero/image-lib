@@ -1,5 +1,7 @@
-const fs = require("fs");
-const path = require("path");
+import * as fs from "fs";
+import * as path from "path";
+
+const emscriptenDTs = `https://raw.githubusercontent.com/GoogleChromeLabs/squoosh/dev/emscripten-types.d.ts`;
 
 // 定义文件名和路径
 const files = ["webp_dec", "webp_enc"];
@@ -29,7 +31,7 @@ files.forEach(async (file) => {
   const jsUrl = `${baseUrl}/${filePath}/${file}.js`;
 
   const wasmFileName = `${file}.wasm`;
-  const wasmPath = path.join("src", "wasm", wasmFileName);
+  // const wasmPath = path.join("src", "wasm", wasmFileName);
   const dtsPath = path.join("src", "wasm", `${file}.d.ts`);
   const jsPath = path.join("src", "wasm", `${file}.js`);
 
@@ -63,6 +65,19 @@ files.forEach(async (file) => {
         ``
       );
 
-  fs.writeFileSync(dtsPath, dtsBuffer);
+  const dtsContent = `/// <reference types="./emscripten-types.d.ts" />\n${dtsBuffer.toString("utf-8")}`;
+
+  fs.writeFileSync(dtsPath, dtsContent);
   fs.writeFileSync(jsPath, jsStrContent);
 });
+
+async function downloadEmscriptenDTs() {
+  const emscriptenDTsBuffer = await downloadFile(emscriptenDTs);
+  if (!emscriptenDTsBuffer) return;
+  fs.writeFileSync(
+    path.resolve(__dirname, "../src/wasm/emscripten-types.d.ts"),
+    emscriptenDTsBuffer
+  );
+}
+
+downloadEmscriptenDTs();

@@ -4,16 +4,11 @@ import { toWebpJsInWorker } from "./toWebpJs";
 
 const webpEncoder = initWebpEncoder();
 
-const encoderInstance = webpEncoder.then(
-  async (
-    res: WebPModule & {
-      ready: Promise<unknown>;
-    }
-  ) => {
-    await res.ready;
-    return res;
-  }
-) as Promise<WebPModule>;
+const encoderInstance = webpEncoder.then(async (res: WebPModule) => {
+  const moduleWithReady = res as WebPModule & { ready: Promise<unknown> };
+  await moduleWithReady.ready;
+  return moduleWithReady;
+}) as Promise<WebPModule>;
 
 const DEFAULT_ENCODE_OPTS = {
   quality: 100,

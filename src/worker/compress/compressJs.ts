@@ -59,8 +59,7 @@ export async function compressJsHandler(message: CompressJsData) {
   const webpBlob = await compressJsInWorker(
     blob,
     message.data.type,
-    message.data.quality,
-    { width: 400, height: 267 }
+    message.data.quality
   );
   const buf = await webpBlob.arrayBuffer();
   postMessage2Main(message.id, { buf }, { transfer: [buf] });

@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WASM Image Compressor</title>
     <script type="module" defer>
-      import { toWebp, toWebpJs } from "./src/index.ts";
+      import { toWebp, toWebpJs, compressImageJs } from "./src/index.ts";
 
       document.addEventListener("DOMContentLoaded", () => {
         const originalImageInput = document.getElementById("original-image");
         const compressButton = document.getElementById("compress-btn");
         const compressJsButton = document.getElementById("compress-js-btn");
+        const compressJsAnyButton = document.getElementById(
+          "compress-js-any-btn"
+        );
         const resetButton = document.getElementById("reset-btn");
         const qualityInput = document.getElementById("quality");
 
@@ -54,7 +57,10 @@
 
               const startTime = performance.now();
 
-              const compressedBlob = await compressFn(originalBlob, { quality });
+              const compressedBlob = await compressFn(originalBlob, {
+                quality,
+                type: originalBlob.type,
+              });
 
               const endTime = performance.now();
               const timeTaken = endTime - startTime;
@@ -77,7 +83,15 @@
         };
 
         compressButton.addEventListener("click", createCompressHandler(toWebp));
-        compressJsButton.addEventListener("click", createCompressHandler(toWebpJs));
+        compressJsButton.addEventListener(
+          "click",
+          createCompressHandler(toWebpJs)
+        );
+        compressJsAnyButton.addEventListener(
+          "click",
+          createCompressHandler(compressImageJs)
+        );
+
         resetButton.addEventListener("click", () => {
           originalImageInput.value = "";
           originalPreview.src = "";
@@ -193,6 +207,7 @@
       <input type="number" id="quality" min="1" max="100" value="80" />
       <button id="compress-btn">Compress</button>
       <button id="compress-js-btn">Compress (JS)</button>
+      <button id="compress-js-any-btn">Compress (Any)</button>
       <button id="reset-btn">Reset</button>
     </div>
     <p id="time-taken" class="info"></p>

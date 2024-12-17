@@ -1,6 +1,6 @@
-import WebpWorker from "../worker/webp?worker&inline";
+import MainWorker from "../worker/index?worker&inline";
 
-const worker = new WebpWorker();
+const worker = new MainWorker();
 
 const DEFAULT_TIMEOUT = 1000 * 60;
 
